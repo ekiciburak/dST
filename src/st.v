@@ -64,8 +64,8 @@ Proof. pcofix CIH.
        unfold l1.
        setoid_rewrite(st_eq s1) at 1. simpl.
        specialize(@lt2st_mu 
-                            (upaco2 lt2st r) fin
-                            (@lt_send fin "p" x (lt_var  0))
+                            (upaco2 lt2st r) nat
+                            (@lt_send nat "p" x (lt_var  0))
                             (st_send "p" nat s1) 
                             (x + x)); intro HM.
        apply HM; clear HM.
@@ -103,9 +103,9 @@ Proof. intros (n, P) m.
        intros n P m. simpl.
        rewrite(st_eq (clAliceH)). simpl.
        pfold.
-       specialize(lt2st_mu (upaco2 lt2st r) fin
+       specialize(lt2st_mu (upaco2 lt2st r) nat
                            (lt_send "Carol" (m+m) (lt_brn "Carol" (cons (pair "correct" lt_end) (cons (pair "wrong" (lt_var 0)) nil))))
-                           (st_send "Carol" fin (st_brn "Carol" (cons (pair "correct" st_end) (cons (pair "wrong" (clAliceH)) nil))))
+                           (st_send "Carol" nat (st_brn "Carol" (cons (pair "correct" st_end) (cons (pair "wrong" (clAliceH)) nil))))
                            (m+m)
        ); intro HM.
        apply HM; clear HM.
@@ -158,9 +158,9 @@ Proof. intros (n, P) m.
        intros n P m. simpl.
        pfold.
        rewrite(st_eq (clAliceH1)). simpl.
-       specialize(lt2st_mu (upaco2 lt2st r) fin
+       specialize(lt2st_mu (upaco2 lt2st r) nat
                            (lt_send "Carol" m (lt_brn "Carol" (cons (pair "correct" lt_end) (cons (pair "wrong" (lt_var 0)) nil))))
-                           (st_send "Carol" fin (st_brn "Carol" (cons (pair "correct" st_end) (cons (pair "wrong" (clAliceH1)) nil))))
+                           (st_send "Carol" nat (st_brn "Carol" (cons (pair "correct" st_end) (cons (pair "wrong" (clAliceH1)) nil))))
                            (m + m)
        ); intro HM.
        apply HM; clear HM.

@@ -129,10 +129,9 @@ Fixpoint replaceSort (s e: sort): sort :=
   end.
 
 
-(* Eval compute in replaceSort (slambda (svar 0) sint (slambda (svar 0) sint (splus (svar 1) (svar 0)))) (sci 22).
+(* 
+Eval compute in replaceSort (slambda (svar 0) sint (slambda (svar 0) sint (splus (svar 1) (svar 0)))) (sci 22).
 
 Eval compute in (replaceSort (splus (svar 0) (slambda (svar 0) sint (splus (svar 0) (sci 20)))) (sminus (svar 0) (sci 1))).
 Eval compute in (replaceSort (slambda (svar 0) (sint) (sminus (svar 0) (sci 5))) (splus (svar 0) (sci 5))). *)
 
-
- *)
