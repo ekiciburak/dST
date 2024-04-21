@@ -5,5 +5,9 @@ sort/fintype.v
 sort/unscoped.v
 sort/header_extensible.v
 sort/sort.v
+sort/beta.v
+sort/sortcheck.v
+processes/process.v
+processes/beta.v
 type/local.v
 src/st.v

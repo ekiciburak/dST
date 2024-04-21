@@ -1,4 +1,4 @@
-From DST Require Import sort.sort type.local.
+From DST Require Import sort.sort type.local processes.process.
 Require Import String List Datatypes Lia.
 Import ListNotations.
 Local Open Scope string_scope.
@@ -90,7 +90,7 @@ Definition lAlice (n: { y: nat & y > 0 }) (m: nat) :=
   ).
 
 CoFixpoint clAliceH: st :=
- st_send "Carol" nat (st_brn "Carol" (cons (pair "correct" st_end) (cons (pair "wrong" (clAliceH)) nil))).
+  st_send "Carol" nat (st_brn "Carol" (cons (pair "correct" st_end) (cons (pair "wrong" (clAliceH)) nil))).
 
 Definition clAlice: st :=
   st_receive "Carol" ({ y: nat & y > 0 }) (clAliceH).
@@ -126,9 +126,9 @@ Proof. intros (n, P) m.
        left. pfold. constructor.
        destruct H as [H | H]. 
        inversion H. subst. right.
-       assert(n+1 > 0) as Hsn.
-       { lia. }
-       specialize (CIH (n+1) Hsn m). simpl in CIH.
+(*        assert(n+1 > 0) as Hsn.
+       { lia. } *)
+       specialize (CIH n P m). simpl in CIH.
        apply CIH.
        easy.
 Qed.
@@ -142,12 +142,12 @@ Definition lAlice1H (m: nat) :=
     )
   ).
 
-Definition lAlice1 (n: sigNT) (m: nat) := lt_receive "Carol" n (lAlice1H m).
+Definition lAlice1 (n: { y: nat | y > 0 }) (m: nat) := lt_receive "Carol" n (lAlice1H m).
 
 CoFixpoint clAliceH1: st :=
   st_send "Carol" nat (st_brn "Carol" (cons (pair "correct" st_end) (cons (pair "wrong" (clAliceH1)) nil))). 
 
-Definition clAlice1: st := st_receive "Carol" sigNT (clAliceH1).
+Definition clAlice1: st := st_receive "Carol" { y: nat | y > 0 } (clAliceH1).
 
 Example lclAlice1: forall n m, lt2stC (lAlice1 n m) (clAlice1).
 Proof. intros (n, P) m.
@@ -181,12 +181,13 @@ Proof. intros (n, P) m.
        left. pfold. constructor.
        destruct H as [H | H]. 
        inversion H. subst. right.
-       assert(if Nat.eqb (n-1) 0 then True else (n-1) > 0) as Hsn.
-       { case_eq (n-1); intro Hn1. simpl. easy. intro Hn2.
-         simpl. lia. }
-       specialize (CIH (n-1) Hsn (m+m)). simpl in CIH.
+       specialize (CIH n P (m+m)). simpl in CIH.
        apply CIH.
        easy.
 Qed.
 
+(*
+Inductive subType: Type -> Type -> Prop :=
+  | dep1: forall A B, subType A B -> subType ({y : A & (A + B)%type }) (forall (y: A), B). 
+*)
 

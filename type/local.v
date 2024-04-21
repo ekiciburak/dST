@@ -1,21 +1,18 @@
 
-From DST Require Import sort.unscoped sort.sort.
+From DST Require Import sort.unscoped sort.sort processes.process.
 Require Import String List Datatypes Lia.
 Import ListNotations.
 Local Open Scope string_scope.
 Local Open Scope list_scope.
 
-Notation participant := string (only parsing).
-Notation label       := string (only parsing).
-
-Inductive local : Type :=
-  | lt_var : fin -> local
-  | lt_sel : ( participant   ) -> ( list (prod (label  ) (local )) ) -> local
-  | lt_brn : ( participant   ) -> ( list (prod (label  ) (local )) ) -> local
-  | lt_receive : forall (A: Type), ( participant   ) -> A -> ( local  ) -> local
-  | lt_send : forall (A: Type), ( participant   ) -> A -> ( local ) -> local
-  | lt_mu : ( local  ) -> local
-  | lt_end : local.
+Inductive local: Type :=
+  | lt_var    : fin -> local
+  | lt_sel    : participant -> list (label*local) -> local
+  | lt_brn    : participant -> list (label*local) -> local
+  | lt_receive: forall (A: Type), participant -> A -> local -> local
+  | lt_send   : forall (A: Type), participant -> A -> local -> local
+  | lt_mu     : local -> local
+  | lt_end    : local.
 
 (* Arguments lt_var {_} _.
 Arguments lt_sel {_} _ _.
@@ -53,13 +50,13 @@ Definition upRen_local_local   (xi : ( fin ) -> fin) : ( fin ) -> fin :=
 
 Fixpoint ren_local  (xilocal : ( fin ) -> fin) (s : local ) : local :=
     match s return local with
-    | lt_var s  => lt_var (xilocal s) 
-    | lt_sel s0 s1 => lt_sel ((fun x => x) s0) ((list_map (prod_map (fun x => x) (ren_local xilocal))) s1)
-    | lt_brn s0 s1 => lt_brn ((fun x => x) s0) ((list_map (prod_map (fun x => x) (ren_local xilocal))) s1)
+    | lt_var s            => lt_var (xilocal s) 
+    | lt_sel s0 s1        => lt_sel ((fun x => x) s0) ((list_map (prod_map (fun x => x) (ren_local xilocal))) s1)
+    | lt_brn s0 s1        => lt_brn ((fun x => x) s0) ((list_map (prod_map (fun x => x) (ren_local xilocal))) s1)
     | lt_receive s0 s1 s2 => lt_receive ((fun x => x) s0) ((fun x => x) s1) ((ren_local xilocal) s2)
-    | lt_send s0 s1 s2 => lt_send ((fun x => x) s0) ((fun x => x) s1) ((ren_local xilocal) s2)
-    | lt_mu s1 => lt_mu ((ren_local (upRen_local_local xilocal)) s1)
-    | lt_end  => lt_end
+    | lt_send s0 s1 s2    => lt_send ((fun x => x) s0) ((fun x => x) s1) ((ren_local xilocal) s2)
+    | lt_mu s1            => lt_mu ((ren_local (upRen_local_local xilocal)) s1)
+    | lt_end              => lt_end
     end.
 
 Definition up_local_local (sigma : ( fin ) -> local) : ( fin ) -> local :=
