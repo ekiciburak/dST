@@ -29,6 +29,14 @@ Definition scons {X: Type} (x : X) (xi : nat -> X) :=
             |S n => xi n
            end.
 
+Definition scons2 {X: Type} (x : X) (xi : nat -> nat -> X) :=
+  fun m => fun n => match n with
+            |0 => x
+            |S n => xi m n
+           end.
+
+Notation "s1 s2 ..: sigma" := (scons2 s1 s2 sigma) (at level 70).
+
 Notation "s .: sigma" := (scons s sigma) (at level 70).
 
 Definition funcomp {X Y Z} (g : Y -> Z) (f : X -> Y)  :=

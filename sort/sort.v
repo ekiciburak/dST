@@ -9,9 +9,9 @@ Inductive sort  : Type :=
   | sbool  : sort
   | sci    : Z    -> sort 
   | scb    : bool -> sort 
-  | spi    : sort -> sort -> sort -> sort
-  | slambda: sort -> sort -> sort -> sort
-  | ssig   : sort -> sort -> sort -> sort
+  | spi    : sort -> sort -> sort
+  | slambda: sort -> sort -> sort
+  | ssig   : sort -> sort -> sort
   | splus  : sort -> sort -> sort
   | sminus : sort -> sort -> sort
   | sgt    : sort -> sort -> sort
@@ -19,11 +19,14 @@ Inductive sort  : Type :=
   | sapp   : sort -> sort -> sort
   | sstar  : sort
   | site   : sort -> sort -> sort -> sort
-  | spair  : sort -> sort -> sort -> sort
-  | sexst  : sort -> sort -> sort
+  | spair  : sort -> sort -> sort
   | sneg   : sort -> sort
   | sand   : sort -> sort -> sort
-  | sor    : sort -> sort -> sort.
+  | sor    : sort -> sort -> sort
+  | sproj1 : sort -> sort
+  | sproj2 : sort -> sort
+  | smu    : sort -> sort.
+  
 
 Lemma congr_sint  : sint  = sint  .
 Proof. congruence. Qed.
@@ -37,13 +40,13 @@ Proof. congruence. Qed.
 Lemma congr_scb  { s0 : bool   } { t0 : bool   } (H1 : s0 = t0) : scb  s0 = scb  t0 .
 Proof. congruence. Qed.
 
-Lemma congr_spi  { s0 : sort   } { s1 : sort   } { s2 : sort   } { t0 : sort   } { t1 : sort   } { t2 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) (H3 : s2 = t2) : spi  s0 s1 s2 = spi  t0 t1 t2 .
+Lemma congr_spi  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) : spi  s0 s1 = spi  t0 t1 .
 Proof. congruence. Qed.
 
-Lemma congr_slambda  { s0 : sort   } { s1 : sort   } { s2 : sort   } { t0 : sort   } { t1 : sort   } { t2 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) (H3 : s2 = t2) : slambda  s0 s1 s2 = slambda  t0 t1 t2 .
+Lemma congr_slambda  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) : slambda  s0 s1 = slambda  t0 t1 .
 Proof. congruence. Qed.
 
-Lemma congr_ssig  { s0 : sort   } { s1 : sort   } { s2 : sort   } { t0 : sort   } { t1 : sort   } { t2 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) (H3 : s2 = t2) : ssig  s0 s1 s2 = ssig  t0 t1 t2 .
+Lemma congr_ssig  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) : ssig  s0 s1 = ssig  t0 t1 .
 Proof. congruence. Qed.
 
 Lemma congr_splus  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) : splus  s0 s1 = splus  t0 t1 .
@@ -67,10 +70,7 @@ Proof. congruence. Qed.
 Lemma congr_site  { s0 : sort   } { s1 : sort   } { s2 : sort   } { t0 : sort   } { t1 : sort   } { t2 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) (H3 : s2 = t2) : site  s0 s1 s2 = site  t0 t1 t2 .
 Proof. congruence. Qed.
 
-Lemma congr_spair  { s0 : sort   } { s1 : sort   } { s2 : sort   } { t0 : sort   } { t1 : sort   } { t2 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) (H3 : s2 = t2) : spair  s0 s1 s2 = spair  t0 t1 t2 .
-Proof. congruence. Qed.
-
-Lemma congr_sexst  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) : sexst  s0 s1 = sexst  t0 t1 .
+Lemma congr_spair  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) : spair  s0 s1 = spair  t0 t1 .
 Proof. congruence. Qed.
 
 Lemma congr_sneg  { s0 : sort   } { t0 : sort   } (H1 : s0 = t0) : sneg  s0 = sneg  t0 .
@@ -80,6 +80,15 @@ Lemma congr_sand  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   
 Proof. congruence. Qed.
 
 Lemma congr_sor  { s0 : sort   } { s1 : sort   } { t0 : sort   } { t1 : sort   } (H1 : s0 = t0) (H2 : s1 = t1) : sor  s0 s1 = sor  t0 t1 .
+Proof. congruence. Qed.
+
+Lemma congr_sproj1  { s0 : sort   } { t0 : sort   } (H1 : s0 = t0) : sproj1  s0 = sproj1  t0 .
+Proof. congruence. Qed.
+
+Lemma congr_sproj2  { s0 : sort   } { t0 : sort   } (H1 : s0 = t0) : sproj2  s0 = sproj2  t0 .
+Proof. congruence. Qed.
+
+Lemma congr_smu  { s0 : sort   } { t0 : sort   } (H1 : s0 = t0) : smu  s0 = smu  t0 .
 Proof. congruence. Qed.
 
 Definition upRen_sort_sort   (xi : ( fin ) -> fin) : ( fin ) -> fin :=
@@ -92,9 +101,9 @@ Fixpoint ren_sort   (xisort : ( fin ) -> fin) (s : sort ) : sort  :=
     | sbool   => sbool 
     | sci  s0 => sci  ((fun x => x) s0)
     | scb  s0 => scb  ((fun x => x) s0)
-    | spi  s0 s1 s2 => spi  ((ren_sort (upRen_sort_sort xisort)) s0) ((ren_sort xisort) s1) ((ren_sort xisort) s2)
-    | slambda  s0 s1 s2 => slambda  ((ren_sort (upRen_sort_sort xisort)) s0) ((ren_sort xisort) s1) ((ren_sort xisort) s2)
-    | ssig  s0 s1 s2 => ssig  ((ren_sort (upRen_sort_sort xisort)) s0) ((ren_sort xisort) s1) ((ren_sort xisort) s2)
+    | spi  s0 s1 => spi  ((ren_sort (upRen_sort_sort xisort)) s0) ((ren_sort xisort) s1)
+    | slambda  s0 s1 => slambda  ((ren_sort (upRen_sort_sort xisort)) s0) ((ren_sort xisort) s1)
+    | ssig  s0 s1 => ssig  ((ren_sort (upRen_sort_sort xisort)) s0) ((ren_sort xisort) s1)
     | splus  s0 s1 => splus  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
     | sminus  s0 s1 => sminus  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
     | sgt  s0 s1 => sgt  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
@@ -102,11 +111,13 @@ Fixpoint ren_sort   (xisort : ( fin ) -> fin) (s : sort ) : sort  :=
     | sapp  s0 s1 => sapp  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
     | sstar   => sstar 
     | site  s0 s1 s2 => site  ((ren_sort xisort) s0) ((ren_sort xisort) s1) ((ren_sort xisort) s2)
-    | spair  s0 s1 s2 => spair  ((ren_sort (upRen_sort_sort xisort)) s0) ((ren_sort xisort) s1) ((ren_sort xisort) s2)
-    | sexst  s0 s1 => sexst  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
+    | spair  s0 s1 => spair  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
     | sneg  s0 => sneg  ((ren_sort xisort) s0)
     | sand  s0 s1 => sand  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
     | sor  s0 s1 => sor  ((ren_sort xisort) s0) ((ren_sort xisort) s1)
+    | sproj1  s0 => sproj1  ((ren_sort xisort) s0)
+    | sproj2  s0 => sproj2  ((ren_sort xisort) s0)
+    | smu  s0 => smu  ((ren_sort (upRen_sort_sort xisort)) s0)
     end.
 
 Definition up_sort_sort   (sigma : ( fin ) -> sort ) : ( fin ) -> sort  :=
@@ -119,9 +130,9 @@ Fixpoint subst_sort   (sigmasort : ( fin ) -> sort ) (s : sort ) : sort  :=
     | sbool   => sbool 
     | sci  s0 => sci  ((fun x => x) s0)
     | scb  s0 => scb  ((fun x => x) s0)
-    | spi  s0 s1 s2 => spi  ((subst_sort (up_sort_sort sigmasort)) s0) ((subst_sort sigmasort) s1) ((subst_sort sigmasort) s2)
-    | slambda  s0 s1 s2 => slambda  ((subst_sort (up_sort_sort sigmasort)) s0) ((subst_sort sigmasort) s1) ((subst_sort sigmasort) s2)
-    | ssig  s0 s1 s2 => ssig  ((subst_sort (up_sort_sort sigmasort)) s0) ((subst_sort sigmasort) s1) ((subst_sort sigmasort) s2)
+    | spi  s0 s1 => spi  ((subst_sort (up_sort_sort sigmasort)) s0) ((subst_sort sigmasort) s1)
+    | slambda  s0 s1 => slambda  ((subst_sort (up_sort_sort sigmasort)) s0) ((subst_sort sigmasort) s1)
+    | ssig  s0 s1 => ssig  ((subst_sort (up_sort_sort sigmasort)) s0) ((subst_sort sigmasort) s1)
     | splus  s0 s1 => splus  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
     | sminus  s0 s1 => sminus  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
     | sgt  s0 s1 => sgt  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
@@ -129,11 +140,13 @@ Fixpoint subst_sort   (sigmasort : ( fin ) -> sort ) (s : sort ) : sort  :=
     | sapp  s0 s1 => sapp  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
     | sstar   => sstar 
     | site  s0 s1 s2 => site  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1) ((subst_sort sigmasort) s2)
-    | spair  s0 s1 s2 => spair  ((subst_sort (up_sort_sort sigmasort)) s0) ((subst_sort sigmasort) s1) ((subst_sort sigmasort) s2)
-    | sexst  s0 s1 => sexst  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
+    | spair  s0 s1 => spair  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
     | sneg  s0 => sneg  ((subst_sort sigmasort) s0)
     | sand  s0 s1 => sand  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
     | sor  s0 s1 => sor  ((subst_sort sigmasort) s0) ((subst_sort sigmasort) s1)
+    | sproj1  s0 => sproj1  ((subst_sort sigmasort) s0)
+    | sproj2  s0 => sproj2  ((subst_sort sigmasort) s0)
+    | smu  s0 => smu  ((subst_sort (up_sort_sort sigmasort)) s0)
     end.
 
 Definition upId_sort_sort  (sigma : ( fin ) -> sort ) (Eq : forall x, sigma x = (svar ) x) : forall x, (up_sort_sort sigma) x = (svar ) x :=
@@ -149,9 +162,9 @@ Fixpoint idSubst_sort  (sigmasort : ( fin ) -> sort ) (Eqsort : forall x, sigmas
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0) ((idSubst_sort sigmasort Eqsort) s1) ((idSubst_sort sigmasort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0) ((idSubst_sort sigmasort Eqsort) s1) ((idSubst_sort sigmasort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0) ((idSubst_sort sigmasort Eqsort) s1) ((idSubst_sort sigmasort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0) ((idSubst_sort sigmasort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0) ((idSubst_sort sigmasort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0) ((idSubst_sort sigmasort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
@@ -159,11 +172,13 @@ Fixpoint idSubst_sort  (sigmasort : ( fin ) -> sort ) (Eqsort : forall x, sigmas
     | sapp  s0 s1 => congr_sapp ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1) ((idSubst_sort sigmasort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0) ((idSubst_sort sigmasort Eqsort) s1) ((idSubst_sort sigmasort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
     | sneg  s0 => congr_sneg ((idSubst_sort sigmasort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((idSubst_sort sigmasort Eqsort) s0) ((idSubst_sort sigmasort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((idSubst_sort sigmasort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((idSubst_sort sigmasort Eqsort) s0)
+    | smu  s0 => congr_smu ((idSubst_sort (up_sort_sort sigmasort) (upId_sort_sort (_) Eqsort)) s0)
     end.
 
 Definition upExtRen_sort_sort   (xi : ( fin ) -> fin) (zeta : ( fin ) -> fin) (Eq : forall x, xi x = zeta x) : forall x, (upRen_sort_sort xi) x = (upRen_sort_sort zeta) x :=
@@ -179,9 +194,9 @@ Fixpoint extRen_sort   (xisort : ( fin ) -> fin) (zetasort : ( fin ) -> fin) (Eq
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0) ((extRen_sort xisort zetasort Eqsort) s1) ((extRen_sort xisort zetasort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0) ((extRen_sort xisort zetasort Eqsort) s1) ((extRen_sort xisort zetasort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0) ((extRen_sort xisort zetasort Eqsort) s1) ((extRen_sort xisort zetasort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0) ((extRen_sort xisort zetasort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0) ((extRen_sort xisort zetasort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0) ((extRen_sort xisort zetasort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
@@ -189,11 +204,13 @@ Fixpoint extRen_sort   (xisort : ( fin ) -> fin) (zetasort : ( fin ) -> fin) (Eq
     | sapp  s0 s1 => congr_sapp ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1) ((extRen_sort xisort zetasort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0) ((extRen_sort xisort zetasort Eqsort) s1) ((extRen_sort xisort zetasort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
     | sneg  s0 => congr_sneg ((extRen_sort xisort zetasort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((extRen_sort xisort zetasort Eqsort) s0) ((extRen_sort xisort zetasort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((extRen_sort xisort zetasort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((extRen_sort xisort zetasort Eqsort) s0)
+    | smu  s0 => congr_smu ((extRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upExtRen_sort_sort (_) (_) Eqsort)) s0)
     end.
 
 Definition upExt_sort_sort   (sigma : ( fin ) -> sort ) (tau : ( fin ) -> sort ) (Eq : forall x, sigma x = tau x) : forall x, (up_sort_sort sigma) x = (up_sort_sort tau) x :=
@@ -209,9 +226,9 @@ Fixpoint ext_sort   (sigmasort : ( fin ) -> sort ) (tausort : ( fin ) -> sort ) 
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0) ((ext_sort sigmasort tausort Eqsort) s1) ((ext_sort sigmasort tausort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0) ((ext_sort sigmasort tausort Eqsort) s1) ((ext_sort sigmasort tausort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0) ((ext_sort sigmasort tausort Eqsort) s1) ((ext_sort sigmasort tausort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0) ((ext_sort sigmasort tausort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0) ((ext_sort sigmasort tausort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0) ((ext_sort sigmasort tausort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
@@ -219,11 +236,13 @@ Fixpoint ext_sort   (sigmasort : ( fin ) -> sort ) (tausort : ( fin ) -> sort ) 
     | sapp  s0 s1 => congr_sapp ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1) ((ext_sort sigmasort tausort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0) ((ext_sort sigmasort tausort Eqsort) s1) ((ext_sort sigmasort tausort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
     | sneg  s0 => congr_sneg ((ext_sort sigmasort tausort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((ext_sort sigmasort tausort Eqsort) s0) ((ext_sort sigmasort tausort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((ext_sort sigmasort tausort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((ext_sort sigmasort tausort Eqsort) s0)
+    | smu  s0 => congr_smu ((ext_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (upExt_sort_sort (_) (_) Eqsort)) s0)
     end.
 
 Definition up_ren_ren_sort_sort    (xi : ( fin ) -> fin) (tau : ( fin ) -> fin) (theta : ( fin ) -> fin) (Eq : forall x, ((funcomp) tau xi) x = theta x) : forall x, ((funcomp) (upRen_sort_sort tau) (upRen_sort_sort xi)) x = (upRen_sort_sort theta) x :=
@@ -236,9 +255,9 @@ Fixpoint compRenRen_sort    (xisort : ( fin ) -> fin) (zetasort : ( fin ) -> fin
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1) ((compRenRen_sort xisort zetasort rhosort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1) ((compRenRen_sort xisort zetasort rhosort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1) ((compRenRen_sort xisort zetasort rhosort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
@@ -246,11 +265,13 @@ Fixpoint compRenRen_sort    (xisort : ( fin ) -> fin) (zetasort : ( fin ) -> fin
     | sapp  s0 s1 => congr_sapp ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1) ((compRenRen_sort xisort zetasort rhosort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1) ((compRenRen_sort xisort zetasort rhosort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
     | sneg  s0 => congr_sneg ((compRenRen_sort xisort zetasort rhosort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((compRenRen_sort xisort zetasort rhosort Eqsort) s0) ((compRenRen_sort xisort zetasort rhosort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((compRenRen_sort xisort zetasort rhosort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((compRenRen_sort xisort zetasort rhosort Eqsort) s0)
+    | smu  s0 => congr_smu ((compRenRen_sort (upRen_sort_sort xisort) (upRen_sort_sort zetasort) (upRen_sort_sort rhosort) (up_ren_ren (_) (_) (_) Eqsort)) s0)
     end.
 
 Definition up_ren_subst_sort_sort    (xi : ( fin ) -> fin) (tau : ( fin ) -> sort ) (theta : ( fin ) -> sort ) (Eq : forall x, ((funcomp) tau xi) x = theta x) : forall x, ((funcomp) (up_sort_sort tau) (upRen_sort_sort xi)) x = (up_sort_sort theta) x :=
@@ -266,9 +287,9 @@ Fixpoint compRenSubst_sort    (xisort : ( fin ) -> fin) (tausort : ( fin ) -> so
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1) ((compRenSubst_sort xisort tausort thetasort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1) ((compRenSubst_sort xisort tausort thetasort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1) ((compRenSubst_sort xisort tausort thetasort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
@@ -276,11 +297,13 @@ Fixpoint compRenSubst_sort    (xisort : ( fin ) -> fin) (tausort : ( fin ) -> so
     | sapp  s0 s1 => congr_sapp ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1) ((compRenSubst_sort xisort tausort thetasort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1) ((compRenSubst_sort xisort tausort thetasort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
     | sneg  s0 => congr_sneg ((compRenSubst_sort xisort tausort thetasort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((compRenSubst_sort xisort tausort thetasort Eqsort) s0) ((compRenSubst_sort xisort tausort thetasort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((compRenSubst_sort xisort tausort thetasort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((compRenSubst_sort xisort tausort thetasort Eqsort) s0)
+    | smu  s0 => congr_smu ((compRenSubst_sort (upRen_sort_sort xisort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_ren_subst_sort_sort (_) (_) (_) Eqsort)) s0)
     end.
 
 Definition up_subst_ren_sort_sort    (sigma : ( fin ) -> sort ) (zetasort : ( fin ) -> fin) (theta : ( fin ) -> sort ) (Eq : forall x, ((funcomp) (ren_sort zetasort) sigma) x = theta x) : forall x, ((funcomp) (ren_sort (upRen_sort_sort zetasort)) (up_sort_sort sigma)) x = (up_sort_sort theta) x :=
@@ -296,9 +319,9 @@ Fixpoint compSubstRen_sort    (sigmasort : ( fin ) -> sort ) (zetasort : ( fin )
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
@@ -306,11 +329,13 @@ Fixpoint compSubstRen_sort    (sigmasort : ( fin ) -> sort ) (zetasort : ( fin )
     | sapp  s0 s1 => congr_sapp ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
     | sneg  s0 => congr_sneg ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0) ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((compSubstRen_sort sigmasort zetasort thetasort Eqsort) s0)
+    | smu  s0 => congr_smu ((compSubstRen_sort (up_sort_sort sigmasort) (upRen_sort_sort zetasort) (up_sort_sort thetasort) (up_subst_ren_sort_sort (_) (_) (_) Eqsort)) s0)
     end.
 
 Definition up_subst_subst_sort_sort    (sigma : ( fin ) -> sort ) (tausort : ( fin ) -> sort ) (theta : ( fin ) -> sort ) (Eq : forall x, ((funcomp) (subst_sort tausort) sigma) x = theta x) : forall x, ((funcomp) (subst_sort (up_sort_sort tausort)) (up_sort_sort sigma)) x = (up_sort_sort theta) x :=
@@ -326,9 +351,9 @@ Fixpoint compSubstSubst_sort    (sigmasort : ( fin ) -> sort ) (tausort : ( fin 
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
@@ -336,11 +361,13 @@ Fixpoint compSubstSubst_sort    (sigmasort : ( fin ) -> sort ) (tausort : ( fin 
     | sapp  s0 s1 => congr_sapp ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
     | sneg  s0 => congr_sneg ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0) ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((compSubstSubst_sort sigmasort tausort thetasort Eqsort) s0)
+    | smu  s0 => congr_smu ((compSubstSubst_sort (up_sort_sort sigmasort) (up_sort_sort tausort) (up_sort_sort thetasort) (up_subst_subst_sort_sort (_) (_) (_) Eqsort)) s0)
     end.
 
 Definition rinstInst_up_sort_sort   (xi : ( fin ) -> fin) (sigma : ( fin ) -> sort ) (Eq : forall x, ((funcomp) (svar ) xi) x = sigma x) : forall x, ((funcomp) (svar ) (upRen_sort_sort xi)) x = (up_sort_sort sigma) x :=
@@ -356,9 +383,9 @@ Fixpoint rinst_inst_sort   (xisort : ( fin ) -> fin) (sigmasort : ( fin ) -> sor
     | sbool   => congr_sbool 
     | sci  s0 => congr_sci ((fun x => (eq_refl) x) s0)
     | scb  s0 => congr_scb ((fun x => (eq_refl) x) s0)
-    | spi  s0 s1 s2 => congr_spi ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1) ((rinst_inst_sort xisort sigmasort Eqsort) s2)
-    | slambda  s0 s1 s2 => congr_slambda ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1) ((rinst_inst_sort xisort sigmasort Eqsort) s2)
-    | ssig  s0 s1 s2 => congr_ssig ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1) ((rinst_inst_sort xisort sigmasort Eqsort) s2)
+    | spi  s0 s1 => congr_spi ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
+    | slambda  s0 s1 => congr_slambda ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
+    | ssig  s0 s1 => congr_ssig ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
     | splus  s0 s1 => congr_splus ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
     | sminus  s0 s1 => congr_sminus ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
     | sgt  s0 s1 => congr_sgt ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
@@ -366,11 +393,13 @@ Fixpoint rinst_inst_sort   (xisort : ( fin ) -> fin) (sigmasort : ( fin ) -> sor
     | sapp  s0 s1 => congr_sapp ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
     | sstar   => congr_sstar 
     | site  s0 s1 s2 => congr_site ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1) ((rinst_inst_sort xisort sigmasort Eqsort) s2)
-    | spair  s0 s1 s2 => congr_spair ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1) ((rinst_inst_sort xisort sigmasort Eqsort) s2)
-    | sexst  s0 s1 => congr_sexst ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
+    | spair  s0 s1 => congr_spair ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
     | sneg  s0 => congr_sneg ((rinst_inst_sort xisort sigmasort Eqsort) s0)
     | sand  s0 s1 => congr_sand ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
     | sor  s0 s1 => congr_sor ((rinst_inst_sort xisort sigmasort Eqsort) s0) ((rinst_inst_sort xisort sigmasort Eqsort) s1)
+    | sproj1  s0 => congr_sproj1 ((rinst_inst_sort xisort sigmasort Eqsort) s0)
+    | sproj2  s0 => congr_sproj2 ((rinst_inst_sort xisort sigmasort Eqsort) s0)
+    | smu  s0 => congr_smu ((rinst_inst_sort (upRen_sort_sort xisort) (up_sort_sort sigmasort) (rinstInst_up_sort_sort (_) (_) Eqsort)) s0)
     end.
 
 Lemma rinstInst_sort   (xisort : ( fin ) -> fin) : ren_sort xisort = subst_sort ((funcomp) (svar ) xisort) .
@@ -413,46 +442,6 @@ Lemma renRen'_sort    (xisort : ( fin ) -> fin) (zetasort : ( fin ) -> fin) : (f
 Proof. exact ((FunctionalExtensionality.functional_extensionality _ _ ) (fun n => renRen_sort xisort zetasort n)). Qed.
 
 End sort.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 Global Instance Subst_sort   : Subst1 (( fin ) -> sort ) (sort ) (sort ) := @subst_sort   .
 

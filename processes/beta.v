@@ -1,6 +1,6 @@
 From DST Require Import sort.unscoped sort.sort sort.beta sort.sortcheck processes.process.
 From Paco Require Import paco.
-Require Import String List ZArith Relations.
+Require Import String List ZArith Relations Nat.
 Local Open Scope string_scope.
 Import ListNotations.
 Require Import Setoid Morphisms.
@@ -35,14 +35,14 @@ Definition subst_expr (p: process) (l: label) (e: sort): process :=
     | ps_receive s0 s1  => 
       let fix next lst :=
       match lst with
-        | (pair (pair lbl (svar 0)) P)::xs => 
-          if eqb lbl l then
+        | (pair (pair lbl (svar n)) P)::xs => 
+          if String.eqb lbl l then
           let fix rec P :=
             match P with
               | ps_send pt l e1 P => ps_send pt l (subst_sort (e .: svar) e1) (rec P)
               | ps_ite e1 P Q     => ps_ite (subst_sort (e .: svar) e1) (rec P) (rec Q)
               | ps_receive s2 s3  => ps_receive s2 ((list_map (prod_map (prod_map (fun x => x) (fun x => x)) (rec))) s3)
-              | ps_mu P           => ps_mu (rec P)
+              | ps_mu P e1        => ps_mu (rec P) (subst_sort (e .: svar) e1)
               | _                 => P
             end
           in rec P
@@ -54,46 +54,136 @@ Definition subst_expr (p: process) (l: label) (e: sort): process :=
     | _                            => p
   end.
 
-(* Definition PBob'': process :=
-  ps_receive "Alice" (cons (pair (pair "l1" (svar 0)) (ps_send "Carol" "l2" (svar 0) (ps_send "Burak" "l3" (svar 100) (ps_send "Cagin" "l4" (svar 88) ps_end))))
-                     (cons (pair (pair "l4" (svar 0)) (ps_send "Carol" "l2" (slambda (svar 0) sint (slambda (svar 0) sint (splus (splus (svar 1) (svar 0)) (svar 2))))
-                       (ps_receive "Alice" 
-                         (cons (pair (pair "l4" (svar 0)) (ps_send "Marol" "l3" (slambda (svar 0) sint (sminus (svar 0) (svar 2))) (ps_send "Burak" "l2" (svar 0) (ps_send "Cagin" "l4" (svar 1) ps_end))))
-                         (cons (pair (pair "l1" (svar 0)) (ps_send "Zarol" "l2" (svar 0) ps_end)) nil))))) nil)
-                     ).
+Fixpoint inclevel (m: nat) (e: sort): sort :=
+    match e with
+      | svar n        => if Nat.leb m n then svar m else e
+      | spair e1 e2   => spair (inclevel m e1) (inclevel m e2)
+      | splus e1 e2   => splus (inclevel m e1) (inclevel m e2)
+      | sminus e1 e2  => sminus (inclevel m e1) (inclevel m e2)
+      | sgt e1 e2     => sgt (inclevel m e1) (inclevel m e2)
+      | sproj1 e1     => sproj1 (inclevel m e1)
+      | slambda e1 e2 => slambda e1 (inclevel (S m) e2)
+      | spi e1 e2     => spi e1 (inclevel (S m) e2)
+      | _             => e
+    end.
 
-Eval compute in (subst_expr PBob'' "l4" (sci 43)).
+Eval compute in (inclevel 0 (slambda sint (slambda sint (splus (svar 1) (svar 0))))).
 
-Definition pp := (ps_receive "Alice"
-            (cons
-               (pair (pair "l4" (svar 0))
-                  (ps_send "Marol" "l3" (slambda (svar 0) sint (sminus (sci 43) (svar 1))) (ps_send "Burak" "l2" (sci 43) (ps_send "Cagin" "l4" (svar 0) ps_end))))
-               (cons (pair (pair "l1" (svar 0)) (ps_send "Zarol" "l2" (sci 43) ps_end)) nil))).
+Eval compute in (inclevel 0 (svar 0)).
 
-Eval compute in (subst_expr pp "l4" (sci 88)). *)
+Fixpoint inclevel_proc (m: nat) (s: process): process :=
+  match s with
+    | ps_mu p e        => ps_mu (inclevel_proc m p) (inclevel m e)
+    | ps_send a l e1 p => ps_send a l (inclevel m e1) (inclevel_proc m p)
+    | ps_receive s0 s1 => ps_receive ((fun x => x) s0) ((list_map (prod_map (prod_map (fun x => x) ((inclevel (S m))(* (ren_sort (unscoped.shift)) *))) (inclevel_proc (S m)))) s1)
+    | ps_ite  s0 s1 s2 => ps_ite ((inclevel m) s0) ((inclevel_proc m) s1) ((inclevel_proc m) s2)
+    | _                => s
+  end.
 
+Definition subst_sort2 (e: sort): sort :=
+  let fix rec P :=
+    match P with
+      | spair e1 e2   => spair e1 (subst_sort ((e1 .: svar)) e2)
+      | sproj1 e1     => sproj1 (rec e1)
+      | slambda e1 e2 => slambda e1 (rec e2)
+      | _             => P
+    end
+  in rec e.
 
-(* Inductive pcong: relation process :=
-  | pmuUnf: forall {A: Type} p v, pcong (ps_mu p) (@unfold_mu A v p). *)
+Fixpoint inclevelA (m: nat) (k: nat) (e: sort): sort :=
+  match e with
+    | svar n        => if ltb m (k+n) then (svar (k+n)) else svar m
+    | spair e1 e2   => spair (inclevelA m k e1) (inclevelA m k e2)
+    | splus e1 e2   => splus (inclevelA m k e1) (inclevelA m k e2)
+    | sminus e1 e2  => sminus (inclevelA m k e1) (inclevelA m k e2)
+    | sgt e1 e2     => sgt (inclevelA m k e1) (inclevelA m k e2)
+    | sproj1 e1     => sproj1 (inclevelA m k e1)
+    | slambda e1 e2 => slambda (inclevelA (S m) k e1) (inclevelA (S m) k e2)
+    | spi e1 e2     => spi (inclevelA (S m) k e1) (inclevelA (S m) k e2)
+    | _             => e
+  end.
+
+Fixpoint inclevel_procA (m: nat) (n: nat) (s: process): process :=
+  match s with
+    | ps_mu p e        => ps_mu (inclevel_procA m n p) e
+    | ps_send a l e1 p => ps_send a l (inclevelA m n e1) (inclevel_procA m n p)
+    | ps_receive s0 s1 => ps_receive ((fun x => x) s0) ((list_map (prod_map (prod_map (fun x => x) ((fun x => x)(* (ren_sort (unscoped.shift)) *))) (inclevel_procA m n))) s1)
+    | ps_ite  s0 s1 s2 => ps_ite ((inclevelA m n) s0) ((inclevel_procA m n) s1) ((inclevel_procA m n) s2)
+    | _                => s
+  end.
+
+Fixpoint subst_proc_sort (m: nat) (n: nat) (e: sort) (p: process) : process :=
+  match p with
+    | ps_send pt l e1 P => (ps_send pt l (subst_sort (((beta e) .: svar)) e1) (subst_proc_sort m n e P))
+    | ps_ite e1 P Q     => (ps_ite (subst_sort ((beta e) .: svar) e1) (subst_proc_sort m n e P) (subst_proc_sort m n e Q))
+    | ps_receive s2 s3  => inclevel_procA m n (ps_receive s2 ((list_map (prod_map (prod_map (fun x => x) (subst_sort (((beta e) .: svar)) ) (* (ren_sort (unscoped.shift) ) *))(fun x => x))) s3))
+    | ps_mu P e1        => (ps_mu (subst_proc_sort m (S n) e P) (subst_sort (((beta e) .: svar)) e1))
+    | _                 => p
+  end.
+
+Fixpoint unfold_muP (m: nat) (n: nat) (s: process): process :=
+  match s with
+    | ps_mu p e        => subst_process (e .: svar) ((ps_mu (subst_proc_sort m (S n) e p) e) .: ps_var) p
+    | ps_send a l e1 p => ps_send a l e1 (unfold_muP m n p)
+    | ps_receive s0 s1 => ps_receive s0 ((list_map (prod_map (prod_map (fun x => x) ((fun x => x) )) (unfold_muP m n))) s1)
+    | ps_ite  s0 s1 s2 => ps_ite s0 ((unfold_muP m n) s1) ((unfold_muP m n) s2)
+    | _                => s
+  end.
+
+Fixpoint unfold_muPn (n: nat) (s: process): process :=
+  match n with
+    | O   => s
+    | S k => unfold_muPn k (unfold_muP 0 1 s)
+  end.
+
+Definition rec_game: process :=
+  ps_receive "Carol" (cons (pair (pair "l1" (svar 0)) 
+             (ps_mu (ps_send "Carol" "l2" (svar 0) 
+                    (ps_receive "Carol" (cons (pair (pair "correct" (svar 0)) 
+                        (ps_send "Alice" "l3" (slambda (spi sint sint) (slambda sint (splus (svar 1) (splus (svar 3) (svar 1))))) ps_end))
+                                        (cons (pair (pair "wrong" (svar 0)) (ps_var 0)) nil))))
+                    (sproj1 (spair (sminus (svar 0) (sci 1)) (sgt (sminus (svar 0) (sci 1)) (sci 0)))))) nil).
+
+Print rec_game.
+(* 
+Let mm := Eval compute in (unfold_muPn 5 rec_game).
+
+Print mm.
+
+Eval compute in (subst_expr mm "l1" (sci 15)).
+
+Definition rec_game2: process :=
+             (ps_mu (ps_send "Carol" "l2" (svar 0) 
+                    (ps_receive "Carol" (cons (pair (pair "correct" (svar 0)) (ps_send "Alice" "l3" (slambda sint (splus (svar 1) (svar 2))) ps_end))
+                                        (cons (pair (pair "wrong" (svar 0)) (ps_var 0)) nil))))
+                    (sproj1 (spair (sminus (svar 0) (sci 1)) (sgt (sminus (svar 0) (sci 1)) (sci 0))))).
+
+Let mm2 := Eval compute in (unfold_muPn 4 rec_game2).
+
+Print mm2.
+ *)
+Inductive pcong: relation process :=
+  | pmuUnf: forall {A: Type} p e, pcong (ps_mu p e) (unfold_muP 0 0 p).
 
 Inductive scong: relation session :=
   | sann   : forall p M, scong ((p <-- ps_end | nilq) ||| M) M
   | scomm  : forall M1 M2, scong (M1 ||| M2) (M2 ||| M1)
   | sassoc : forall M1 M2 M3, scong (M1 ||| M2 ||| M3) (M1 ||| (M2 ||| M3))
 (*| sassoc2: forall M1 M2 M3, scong (M1 ||| M2 ||| M3) ((M1 ||| M2) ||| M3) *)
-  | sassoc2: forall M1 M2 M3, scong (M1 ||| M2 ||| M3) (M1 ||| (M3 ||| M2)).
- (* | scongl : forall p P Q h1 h2 M, pcong P Q -> qcong h1 h2 -> 
-                                   scong ((p <-- P | h1) ||| M) ((p <-- Q | h2) ||| M). *)
+  | sassoc2: forall M1 M2 M3, scong (M1 ||| M2 ||| M3) (M1 ||| (M3 ||| M2))
+  | scongl : forall p P Q h1 h2 M, pcong P Q -> qcong h1 h2 -> 
+                                   scong ((p <-- P | h1) ||| M) ((p <-- Q | h2) ||| M).
+
 Inductive beta: relation session :=
-  | r_send : forall p q l e P hp M, 
+  | r_send : forall p q l e P hp M n, 
                                 beta ((p <-- (ps_send q l e P) | hp) ||| M) 
-                                     ((p <-- P | conq hp (mesq q l e nilq)) ||| M)
+                                     ((p <-- P | conq hp (mesq q l (betan n e) nilq)) ||| M)
   | r_rcv   : forall p q l xs v Q hp hq M,
                                 beta ((p <-- ps_receive q xs | hp) ||| (q <-- Q | conq (mesq p l v nilq) hq) ||| M)
                                      ((p <-- subst_expr (ps_receive q xs) l v | hp)  ||| (q <-- Q | hq) ||| M)
   | r_cond_t: forall p P Q h M, beta ((p <-- ps_ite (scb true) P Q | h) ||| M) ((p <-- P | h) ||| M)
-  | r_cond_f: forall p P Q h M, beta ((p <-- ps_ite (scb false) P Q | h) ||| M) ((p <-- Q | h) ||| M).
-(*   | r_struct: forall M1 M1' M2 M2', scong M1 M1' -> scong M2' M2 -> beta M1' M2' -> beta M1 M2. *)
+  | r_cond_f: forall p P Q h M, beta ((p <-- ps_ite (scb false) P Q | h) ||| M) ((p <-- Q | h) ||| M)
+  | r_struct: forall M1 M1' M2 M2', scong M1 M1' -> scong M2' M2 -> beta M1' M2' -> beta M1 M2.
 
 Declare Instance Equivalence_beta : Equivalence beta.
 Declare Instance Equivalence_scong : Equivalence scong.
@@ -124,7 +214,7 @@ Proof. intros.
        apply multi_step with (y := 
          ((q <-- ps_end | (conq nilq (mesq p l (sci 42) nilq))) ||| 
           (p <-- ps_receive q (cons (pair (pair l (svar 0)) ps_end) nil) | nilq))).
-       apply r_send. simpl.
+       apply r_send with (n := 1). simpl.
        setoid_rewrite scomm.
        apply multi_step with (y := 
          (((p <-- subst_expr (ps_receive q (cons (pair (pair l (svar 0)) ps_end) nil)) l (sci 42) | nilq) ||| 
@@ -163,7 +253,7 @@ Proof. unfold beta_multistep, MS, MS', PAlice.
        (y := (("Alice" <-- (ps_receive "Carol" (cons (pair (pair "l3" (svar 0)) ps_end) nil)) | conq nilq (mesq "Bob" "l1" (sci 50) nilq)) ||| 
              ("Bob" <-- PBob | nilq)) ||| ("Carol" <-- PCarol | nilq)).
        setoid_rewrite sassoc.
-       apply r_send. simpl.
+       apply r_send with (n := 1). simpl.
 
        setoid_rewrite sassoc.
        setoid_rewrite scomm.
@@ -189,7 +279,7 @@ Proof. unfold beta_multistep, MS, MS', PAlice.
                ||| ("Carol" <-- (ps_receive "Bob" (cons (pair (pair "l2" (svar 0)) (ps_send "Alice" "l3" (splus (svar 0) (sci 1)) ps_end)) nil)) | nilq))
                ||| ("Alice" <-- (ps_receive "Carol" (cons (pair (pair "l3" (svar 0)) ps_end) nil)) | nilq))).
        setoid_rewrite sassoc.
-       apply r_send. simpl.
+       apply r_send with (n := 1). simpl.
 
        setoid_rewrite sassoc.
        setoid_rewrite scomm.
@@ -206,11 +296,11 @@ Proof. unfold beta_multistep, MS, MS', PAlice.
        setoid_rewrite <- sassoc.
 
        apply multi_step with
-       (y := ((("Carol" <-- ps_end | conq nilq (mesq "Alice" "l3" (splus (sci 100) (sci 1)) nilq) )
+       (y := ((("Carol" <-- ps_end | conq nilq (mesq "Alice" "l3" (sci 101) nilq) )
                ||| ("Alice" <-- (ps_receive "Carol" (cons (pair (pair "l3" (svar 0)) ps_end) nil)) | nilq))
                ||| ("Bob" <-- ps_end | nilq))).
        setoid_rewrite sassoc. simpl.
-       apply r_send. simpl.
+       apply r_send with (n := 1). simpl.
 
        setoid_rewrite sassoc.
        setoid_rewrite scomm.
@@ -219,7 +309,7 @@ Proof. unfold beta_multistep, MS, MS', PAlice.
 
       apply multi_step with
       (y := ((("Alice" <-- subst_expr (ps_receive "Carol" (cons (pair (pair "l3" (svar 0)) ps_end) nil))
-                                      "l3" (splus (sci 100) (sci 1)) | nilq) 
+                                      "l3" (sci 101) | nilq) 
              ||| ("Carol" <-- ps_end | nilq))
              ||| ("Bob" <-- ps_end | nilq))).
       apply r_rcv. simpl.

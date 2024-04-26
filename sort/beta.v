@@ -3,27 +3,20 @@ Require Import ZArith.
 
 Definition isVal (s: sort): bool :=
   match s with
-    | slambda e1 e2 e3 => true
-    | spi e1 e2 e3     => true
-    | spair e1 e2 e3   => true
-    | ssig e1 e2 e3     => true
-    | sstar            => true
-    | sci n            => true
-    | scb b            => true
-    | sint             => true
-    | sbool            => true 
-    | _                => false
+    | slambda e1 e2 => true
+    | spair e1 e2   => true
+    | sci n         => true
+    | scb b         => true
+    | _             => false
   end.
 
 Fixpoint beta (s: sort): sort :=
   match s with
-    | sapp (slambda y e1 e2) e3    => subst_sort (e3 .: svar) e2
-    | slambda y e1 e2              => slambda y (beta e1) (beta e2)
-    | sapp (spi y e1 e2) e3        => subst_sort (e3 .: svar) e2
-    | spi y e1 e2                  => spi y (beta e1) (beta e2)
-    | ssig y e1 e2                 => ssig y (beta e1) (beta e2)
-    | sexst e3 (spair y e1 e2)     => subst_sort (e3 .: svar) e2
-    | sexst e1 e2                  => sexst (beta e1) e2
+    | sapp (slambda e1 e2) e3      => subst_sort (e3 .: svar) e2
+    | slambda e1 e2                => slambda (beta e1) (beta e2)
+    | sapp (spi e1 e2) e3          => subst_sort (e3 .: svar) e2
+    | spi e1 e2                    => spi (beta e1) (beta e2)
+    | ssig e1 e2                   => ssig (beta e1) (beta e2)
     | sapp e1 e2                   => sapp (beta e1) e2
     | splus e1 e2                  => let be1 := beta e1 in
                                       let be2 := beta e2 in 
@@ -98,6 +91,11 @@ Fixpoint beta (s: sort): sort :=
                                           end
                                         | _     => sor be1 be2
                                       end
+    | sproj1(spair e1 e2)          => e1
+    | sproj2(spair e1 e2)          => e2
+(*     | sproj1 e1                    => sproj1 (beta e1)
+    | sproj2 e1                    => sproj2 (beta e1) *)
+    | smu s                        => subst_sort ((smu s) .: svar) s
     | _                            => s
   end.
 
@@ -108,14 +106,13 @@ Fixpoint betan (n: nat) (s: sort): sort :=
   end.
 
 
-Fixpoint replaceSort (s e: sort): sort :=
+(* Fixpoint replaceSort (s e: sort): sort :=
   match s with
     | slambda x e1 e2 => (subst_sort (e .: svar) e2)
     | spi x e1 e2     => (subst_sort (e .: svar) e2)
-    | spair x e1 e2   => (subst_sort (e .: svar) e2)
+    | spair e1 e2     => (subst_sort (e .: svar) e2)
     | ssig x e1 e2    => (subst_sort (e .: svar) e2)
     | sapp e1 e2      => sapp (replaceSort e1 e) (replaceSort e2 e)
-    | sexst e1 e2     => sexst (replaceSort e1 e) (replaceSort e2 e)
     | splus e1 e2     => splus (replaceSort e1 e) (replaceSort e2 e)
     | sminus e1 e2    => sminus (replaceSort e1 e) (replaceSort e2 e)
     | sgt e1 e2       => sgt (replaceSort e1 e) (replaceSort e2 e)
@@ -126,7 +123,7 @@ Fixpoint replaceSort (s e: sort): sort :=
     | sor e1 e2       => sor (replaceSort e1 e) (replaceSort e2 e)
     | svar n          => (* if isVal e then e else s *) e
     | _               => s
-  end.
+  end. *)
 
 
 (* 
