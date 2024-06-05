@@ -3,7 +3,7 @@
 
 Version: December 11, 2019.
 *)
-From DST Require Import axioms.
+From RDST Require Import axioms.
 Set Implicit Arguments.
 Unset Strict Implicit.
 

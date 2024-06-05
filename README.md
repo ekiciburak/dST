@@ -1,2 +1,2 @@
 # dependentDST
-An experimental development of session types with dependently typed data
+An experimental development of session types + dependent types

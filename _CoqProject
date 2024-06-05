@@ -1,13 +1,10 @@
--R . DST
+-R . RDST
 
-sort/axioms.v
-sort/fintype.v
-sort/unscoped.v
-sort/header_extensible.v
-sort/sort.v
-sort/beta.v
-sort/sortcheck.v
-processes/process.v
-processes/beta.v
+type/LibTactics.v
+type/axioms.v
+type/fintype.v
+type/unscoped.v
+type/header_extensible.v
 type/local.v
-src/st.v
+type/beta.v
+type/typecheck.v

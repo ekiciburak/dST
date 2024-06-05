@@ -3,7 +3,7 @@
 Version: December 11, 2019.
  *)
 
-From DST Require Export axioms.
+From RDST Require Export axioms.
 
 Definition ap {X Y} (f : X -> Y) {x y : X} (p : x = y) : f x = f y :=
   match p with eq_refl => eq_refl end.
@@ -99,9 +99,9 @@ Class Subst4 (X1 X2 X3 X4: Type) (Y Z: Type) :=
 Class Subst5 (X1 X2 X3 X4 X5 : Type) (Y Z: Type) :=
   subst5 : X1 -> X2 -> X3 -> X4 -> X5  -> Y  -> Z.
 
-Notation "s [ sigma ]" := (subst1 sigma s) (at level 7, left associativity, format "s '/' [ sigma ]") : subst_scope.
+Notation "s |-- sigma --|" := (subst1 sigma s) (at level 7, left associativity, format "s '/' |-- sigma --|") : subst_scope.
 
-Notation "s [ sigma ; tau ]" := (subst2 sigma tau s) (at level 7, left associativity, format "s '/' [ sigma ; '/'  tau ]") : subst_scope.
+Notation "s ||-- sigma ; tau --||" := (subst2 sigma tau s) (at level 7, left associativity, format "s '/' ||-- sigma ; '/'  tau --||") : subst_scope.
 
 
 (** *** Type Class for Variables *)
@@ -199,7 +199,7 @@ Ltac fsimplc :=
 Tactic Notation "fsimpl" "in" "*" :=
   fsimpl; fsimplc.
 
-Notation "s , sigma" := (scons s sigma) (at level 60, format "s ,  sigma", right associativity) : subst_scope.
+Notation "s |, sigma" := (scons s sigma) (at level 60, format "s |,  sigma", right associativity) : subst_scope.
 
 Notation "s '..'" := (scons s ids) (at level 1, format "s ..") : subst_scope.
 #[export] Instance idsRen : Var nat nat := id.

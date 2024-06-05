@@ -1,14 +1,25 @@
-  participant: Type
-  sort       : Type
-  local      : Type
-  label      : Type
-  type       : Type
-  list       : Functor
-  prod       : Functor
+  local : Type
+  participant : Type
+  label : Type
+  list : Functor
+  prod: Functor
 
-  ltsel    : participant -> "list" ("prod" (label, local)) -> local
-  ltbrn    : participant -> "list" ("prod" (label, local)) -> local  
-  ltreceive: participant -> type -> local -> local
-  ltsend   : participant -> type -> local -> local
-  ltmu     : sort -> (local -> local) -> local
-  ltend    : local
+  ltend     : local
+  ltsend    : participant -> label -> local -> local -> local
+  ltreceive : participant -> "list" ("prod" ("prod" (label, local), local)) -> local
+  ltselect  : participant -> "list" ("prod" ("prod" (label, local), local)) -> local
+  ltbranch  : participant -> "list" ("prod" ("prod" (label, local), local)) -> local
+  ltmu      : (local -> local) -> local -> local
+  ltpi      : (local -> local) -> local -> local
+  ltlambda  : (local -> local) -> local -> local
+  ltsig     : (local -> local) -> local -> local
+  ltite     : local -> local -> local -> local
+  ltpair    : local -> local -> local
+  ltzero    : local
+  ltsucc    : local -> local
+  ltfalse   : local
+  lttrue    : local
+  ltnat     : local
+  ltbool    : local
+  ltstar    : local
+
