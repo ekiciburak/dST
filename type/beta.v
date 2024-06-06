@@ -5,7 +5,7 @@ Local Open Scope string_scope.
 Local Open Scope list_scope.
 Require Import Setoid Morphisms Coq.Program.Basics.
 
-Fixpoint compute_plus (e1 e2: local): option local :=
+(* Fixpoint compute_plus (e1 e2: local): option local :=
   match (e1, e2) with
     | (ltzero, ltzero)       => Some ltzero
     | (ltsucc k1, ltsucc k2) => let s := (compute_plus k1 k2) in
@@ -18,11 +18,11 @@ Fixpoint compute_plus (e1 e2: local): option local :=
     | _                      => None
   end.
 
-(* Eval compute in compute_plus (ltsend "p" "l" ltnat ltend) (ltsucc (ltsucc ltzero)). *)
+(* Eval compute in compute_plus (ltsend "p" "l" ltnat ltend) (ltnval 1). *)
 
 Definition complus (e: local): local :=
   match e with
-    | ltplus e1 e2 =>
+    | ltadd e1 e2 =>
     let fix next e1 e2 :=
       match (e1, e2) with
         | (ltzero, ltzero)       => ltzero
@@ -33,9 +33,9 @@ Definition complus (e: local): local :=
       end
     in next e1 e2
     | _           => e
-  end.
+  end. *)
 
-(* Eval compute in complus (ltplus  (ltsucc (ltsucc ltzero)) (ltsucc (ltsucc ltzero))). *)
+(* Eval compute in complus (ltadd  (ltnval 1) (ltnval 1)). *)
 
 Fixpoint betaP (s: local): local :=
   match s with
@@ -44,9 +44,9 @@ Fixpoint betaP (s: local): local :=
     | ltapp (ltpi e1 e2) e3        => subst_local (e3 .: ltvar) e2
     | ltpi e1 e2                   => ltpi (betaP e1) (betaP e2)
     | ltsig e1 e2                  => ltsig (betaP e1) (betaP e2)
-    | ltite (lttrue) e1 e2         => e1
-    | ltite (ltfalse) e1 e2        => e2
-    | ltplus e1 e2                 => complus s
+    | ltite (ltbval true) e1 e2    => e1
+    | ltite (ltbval false) e1 e2   => e2
+(*     | ltadd e1 e2                 => complus s *)
     | _                            => s
   end.
 
@@ -128,9 +128,9 @@ Fixpoint betaL (u: local): local :=
     | ltapp (ltlambda e1 e2) e3 => (subst_local (e3 .: ltvar) e2) 
 (*     | ltapp (ltmu e1 e2) e3     => (subst_local (e3 .: ltvar) ((ltmu e1 e2)))  *)
     | ltapp (ltpi e1 e2) e3     => (subst_local (e3 .: ltvar) e2)
-    | ltite (lttrue) e1 e2      => e1
-    | ltite (ltfalse) e1 e2     => e2 
-    | ltplus e1 e2              => (complus (ltplus e1 e2))
+    | ltite (ltbval true) e1 e2 => e1
+    | ltite (ltbval false) e1 e2=> e2 
+(*     | ltadd e1 e2              => (complus (ltadd e1 e2)) *)
     | ltmu P t as f             => incn (subst_local (f .: ltvar) P)
     | ltlambda e1 e2            => ltlambda (betaL e1) (betaL e2)
     | ltadd e1 e2               => match (e1,e2) with
@@ -188,10 +188,10 @@ Definition beta (k: participant) (u: process): process :=
     | ltapp (ltpi e1 e2) e3     => (mkproc (subst_local (e3 .: ltvar) e2) (@queue u))
     | ltapp e1 e2 as f          => (mkproc (betaL f) (@queue u))
     | ltlambda e1 e2 as f       => (mkproc (betaL f) (@queue u))
-    | ltite (lttrue) e1 e2      => (mkproc e1 (@queue u))
-    | ltite (ltfalse) e1 e2     => (mkproc e2 (@queue u))
+    | ltite (ltbval true) e1 e2 => (mkproc e1 (@queue u))
+    | ltite (ltbval false) e1 e2=> (mkproc e2 (@queue u))
     | ltite e1 e2 e3 as f       => (mkproc (betaL f) (@queue u))
-    | ltplus e1 e2              => (mkproc (complus (ltplus e1 e2)) (@queue u))
+(*     | ltadd e1 e2              => (mkproc (complus (ltadd e1 e2)) (@queue u)) *)
     | ltadd e1 e2 as f          => (mkproc (betaL f) (@queue u))
     | ltmult e1 e2 as f         => (mkproc (betaL f) (@queue u))
     | ltgt e1 e2 as f           => (mkproc (betaL f) (@queue u))
@@ -204,8 +204,8 @@ Definition isVal (s: process): bool :=
     | ltlambda e1 e2 => true
     | ltpi e1 e2     => true
     | ltstar         => true
-    | ltsucc n       => true
-    | ltzero         => true
+(*     | ltsucc n       => true
+    | ltzero         => true *)
     | _              => false
   end.
 
@@ -215,6 +215,12 @@ Fixpoint betan (n: nat) (p: participant) (s: process): process :=
     | S k => (* if isVal s then s else  *) betan k p (beta p s) 
   end.
 
+Fixpoint betanList (n: nat) (p: participant) (l: list process): list process :=
+  match l with
+    | []    => []
+    | x::xs => betan n p x :: betanList n p xs
+  end.
+
 Definition betanL (n: nat) (p: participant) (s: process): process :=
   let fix next n b :=
     match n with
@@ -222,6 +228,18 @@ Definition betanL (n: nat) (p: participant) (s: process): process :=
       | S k => next k (betaL b) 
     end
   in mkproc (next n (@body s)) (@queue s).
+
+Fixpoint mkprocL (l: list local): list process :=
+  match l with
+    | []    => []
+    | x::xs => mkproc x gnil :: mkprocL xs
+  end.
+
+Fixpoint mklocalL (l: list process): list local :=
+  match l with
+    | []    => []
+    | x::xs => @body x :: mklocalL xs
+  end.
 
 Inductive session: Type :=
   | sind: participant -> process -> session
@@ -256,22 +274,22 @@ Inductive betaS: relation sessionA :=
                                           (mksession ((p <-- (@body e) | lq) ||| M) gq).
 
 Definition PAlice: local := 
-  (ltsend "Bob" "l1" (ltzero) (ltreceive "Carol" [("l3",ltnat,ltend)])).
+  (ltsend "Bob" "l1" (ltnval 0) (ltreceive "Carol" [("l3",ltnat,ltend)])).
 
 Definition PBob: local :=
-   (ltreceive "Alice" [("l1",ltnat,(ltsend "Carol" "l2" (ltsucc ltzero) ltend));
-                       ("l4",ltnat,(ltsend "Carol" "l2" (ltsucc (ltsucc ltzero)) ltend))
+   (ltreceive "Alice" [("l1",ltnat,(ltsend "Carol" "l2" (ltnval 1) ltend));
+                       ("l4",ltnat,(ltsend "Carol" "l2" (ltnval 2) ltend))
                       ]).
 
 Definition PCarol: local :=
- (ltreceive "Bob" [("l2",ltnat,(ltsend "Alice" "l3" (ltplus (ltvar 0) (ltsucc (ltzero))) ltend))]).
+ (ltreceive "Bob" [("l2",ltnat,(ltsend "Alice" "l3" (ltadd (ltvar 0) (ltnval 1)) ltend))]).
 
 
 Definition MS: sessionA := mksession (("Alice" <-- PAlice | gnil) ||| ("Bob" <-- PBob | gnil) ||| ("Carol" <-- PCarol | gnil)) gnil.
 
-Definition MS': sessionA := mksession (("Alice" <-- ltend | (gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)) 
-                                   ||| ("Bob"   <-- ltend | (gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) gnil)) 
-                                   ||| ("Carol" <-- ltend | (gcons "Carol" (lcons "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) lnil) gnil)))
+Definition MS': sessionA := mksession (("Alice" <-- ltend | (gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)) 
+                                   ||| ("Bob"   <-- ltend | (gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) gnil)) 
+                                   ||| ("Carol" <-- ltend | (gcons "Carol" (lcons "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) lnil) gnil)))
                                    (gcons "Carol" lnil (gcons "Bob" lnil (gcons "Alice" lnil gnil))).
 
 Inductive pcong: relation local :=
@@ -319,20 +337,20 @@ Proof. intros.
        unfold betaS_multistep, MS, MS', PAlice.
 
        (* Eval compute in (beta "Alice" 
-                              (mkproc (ltsend "Bob" "l1" ltzero (ltreceive "Carol" [("l3", ltnat, ltend)]))
-                              gnil)). *)
+                                (mkproc (ltsend "Bob" "l1" (ltnval 0) (ltreceive "Carol" [("l3", ltnat, ltend)]))
+                                gnil)). *)
 
        (* Eval compute in (beta "Bob" 
-                              (mkproc (ltreceive "Alice" [("l1", ltnat, ltsend "Carol" "l2" (ltsucc ltzero) ltend);
-                                                          ("l4", ltnat, ltsend "Carol" "l2" (ltsucc (ltsucc ltzero)) ltend)])
+                              (mkproc (ltreceive "Alice" [("l1", ltnat, ltsend "Carol" "l2" (ltnval 1) ltend);
+                                                          ("l4", ltnat, ltsend "Carol" "l2" (ltnval 2) ltend)])
                                gnil)). *)
 
        apply multi_step with
-       (y :=  mksession ((("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | ( gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil))
+       (y :=  mksession ((("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | ( gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil))
                       ||| ("Bob" <-- PBob | gnil))
-                      ||| ("Carol" <-- PCarol | gnil)) (gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)).
+                      ||| ("Carol" <-- PCarol | gnil)) (gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)).
        specialize(r_send "Alice" "Bob" "l1" 
-                         ltzero
+                         (ltnval 0)
                          (ltreceive "Carol" [("l3", ltnat, ltend)])
                          gnil
                          gnil
@@ -347,21 +365,21 @@ Proof. intros.
        unfold PBob.
 
        (* Eval compute in  (beta "Bob"
-                              (mkproc (ltreceive "Alice" [("l1", ltnat, ltsend "Carol" "l2" (ltsucc ltzero) ltend);
-                                                          ("l4", ltnat, ltsend "Carol" "l2" (ltsucc (ltsucc ltzero)) ltend)])
+                              (mkproc (ltreceive "Alice" [("l1", ltnat, ltsend "Carol" "l2" (ltnval 1) ltend);
+                                                          ("l4", ltnat, ltsend "Carol" "l2" (ltnval 2) ltend)])
                               (gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil))). *)
 
        apply multi_step with
-       (y := mksession ((("Bob" <-- ltsend "Carol" "l2" (ltsucc ltzero) ltend | gnil)
+       (y := mksession ((("Bob" <-- ltsend "Carol" "l2" (ltnval 1) ltend | gnil)
               ||| ("Carol" <-- PCarol | gnil))
-              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | (gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil))) (gcons "Alice" lnil gnil) ).
+              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | (gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil))) (gcons "Alice" lnil gnil) ).
 
        specialize(r_receive "Bob" "Alice"
-                            ([("l1", ltnat, ltsend "Carol" "l2" (ltsucc ltzero) ltend);
-                             ("l4", ltnat, ltsend "Carol" "l2" (ltsucc (ltsucc ltzero)) ltend)])
-                            (gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)
+                            ([("l1", ltnat, ltsend "Carol" "l2" (ltnval 1) ltend);
+                             ("l4", ltnat, ltsend "Carol" "l2" (ltnval 2) ltend)])
+                            (gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)
                             gnil
-                            (("Carol" <-- PCarol | gnil) ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | (gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)))
+                            (("Carol" <-- PCarol | gnil) ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | (gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)))
        ); intros HR; simpl in HR.
        setoid_rewrite sassocA.
        apply HR.
@@ -369,22 +387,22 @@ Proof. intros.
        unfold PCarol.
 
        (* Eval compute in (beta "Bob"
-                              (mkproc (ltsend "Carol" "l2" (ltsucc ltzero) ltend) 
-                              gnil)). *)
+                                (mkproc (ltsend "Carol" "l2" (ltnval 1) ltend) 
+                                gnil)). *)
 
        apply multi_step with
-       (y := mksession ((("Bob" <-- ltend | (gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) gnil))
-              ||| ("Carol" <-- ltreceive "Bob" [("l2", ltnat, ltsend "Alice" "l3" (ltplus (ltvar 0) (ltsucc ltzero)) ltend)] | gnil))
-              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)) 
-               (gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) (gcons "Alice" lnil gnil)) ).
+       (y := mksession ((("Bob" <-- ltend | (gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) gnil))
+              ||| ("Carol" <-- ltreceive "Bob" [("l2", ltnat, ltsend "Alice" "l3" (ltadd (ltvar 0) (ltnval 1)) ltend)] | gnil))
+              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)) 
+               (gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) (gcons "Alice" lnil gnil)) ).
 
        specialize(r_send "Bob" "Carol" "l2"
-                         (ltsucc ltzero) 
+                         (ltnval 1)
                          ltend
                          gnil
                          (gcons "Alice" lnil gnil)
-                         (("Carol" <-- ltreceive "Bob" [("l2", ltnat, ltsend "Alice" "l3" (ltplus (ltvar 0) (ltsucc ltzero)) ltend)] | gnil)
-                          ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil))
+                         (("Carol" <-- ltreceive "Bob" [("l2", ltnat, ltsend "Alice" "l3" (ltadd (ltvar 0) (ltnval 1)) ltend)] | gnil)
+                          ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil))
        ); intro HR; simpl in HR.
         setoid_rewrite sassocA.
         apply HR.
@@ -395,41 +413,41 @@ Proof. intros.
 
 
        (* Eval compute in (beta "Carol"
-                              (mkproc (ltreceive "Bob" [("l2", ltnat, ltsend "Alice" "l3" (ltplus (ltvar 0) (ltsucc ltzero)) ltend)]) 
-                              (gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) (gcons "Alice" lnil gnil)))). *)
+                                (mkproc (ltreceive "Bob" [("l2", ltnat, ltsend "Alice" "l3" (ltadd (ltvar 1) (ltnval 1)) ltend)]) 
+                                (gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) (gcons "Alice" lnil gnil)))). *)
 
        apply multi_step with
-       (y := mksession ((("Carol" <-- ltsend "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) ltend | gnil)
-              ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) gnil))
-              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)) 
+       (y := mksession ((("Carol" <-- ltsend "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) ltend | gnil)
+              ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) gnil))
+              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)) 
                (gcons "Bob" lnil (gcons "Alice" lnil gnil)) ).
        specialize(r_receive "Carol" "Bob"
-                            ([("l2", ltnat, ltsend "Alice" "l3" (ltplus (ltvar 0) (ltsucc ltzero)) ltend)])
-                            (gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) (gcons "Alice" lnil gnil))
+                            ([("l2", ltnat, ltsend "Alice" "l3" (ltadd (ltvar 0) (ltnval 1)) ltend)])
+                            (gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) (gcons "Alice" lnil gnil))
                             gnil
        ); intro HR; simpl in HR.
        setoid_rewrite sassocA.
        apply HR.
 
        (*  Eval compute in (beta "Carol" 
-                                 (mkproc (ltsend "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) ltend)  
+                                 (mkproc (ltsend "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) ltend)  
                                  (gnil))). *)
 
        setoid_rewrite sassoc2A.
 
        apply multi_step with
-       (y := mksession ((("Carol" <-- ltend | (gcons "Carol" (lcons "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) lnil) gnil))
-              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil))
-              ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) gnil)) 
-               (gcons "Carol" (lcons "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) lnil) (gcons "Bob" lnil (gcons "Alice" lnil gnil))) ).
+       (y := mksession ((("Carol" <-- ltend | (gcons "Carol" (lcons "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) lnil) gnil))
+              ||| ("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil))
+              ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) gnil)) 
+               (gcons "Carol" (lcons "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) lnil) (gcons "Bob" lnil (gcons "Alice" lnil gnil))) ).
 
        specialize(r_send "Carol" "Alice" "l3"
-                         (ltplus (ltsucc ltzero) (ltsucc ltzero))
+                         (ltadd (ltnval 1) (ltnval 1))
                          ltend
                          gnil
                          (gcons "Bob" lnil (gcons "Alice" lnil gnil))
-                         ((("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)
-                          ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) gnil)))
+                         ((("Alice" <-- ltreceive "Carol" [("l3", ltnat, ltend)] | gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)
+                          ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) gnil)))
        ); intro HS; simpl in HS.
        setoid_rewrite sassocA.
        apply HS.
@@ -439,19 +457,19 @@ Proof. intros.
        setoid_rewrite sassoc2A.
 
        (* Eval compute in (beta "Alice" 
-                             (mkproc (ltreceive "Carol" [("l3", ltnat, ltend)])
-                             (gcons "Carol" (lcons "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) lnil) (gcons "Bob" lnil (gcons "Alice" lnil gnil))))). *)
+                                (mkproc (ltreceive "Carol" [("l3", ltnat, ltend)])
+                                (gcons "Carol" (lcons "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) lnil) (gcons "Bob" lnil (gcons "Alice" lnil gnil))))). *)
 
        apply multi_step with
-       (y := mksession ((("Alice" <-- ltend | gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)
-              ||| ("Carol" <-- ltend | gcons "Carol" (lcons "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) lnil) gnil))
-              ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltsucc ltzero) lnil) gnil)) 
+       (y := mksession ((("Alice" <-- ltend | gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)
+              ||| ("Carol" <-- ltend | gcons "Carol" (lcons "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) lnil) gnil))
+              ||| ("Bob" <-- ltend | gcons "Bob" (lcons "Carol" "l2" (ltnval 1) lnil) gnil)) 
                (gcons "Carol" lnil (gcons "Bob" lnil (gcons "Alice" lnil gnil))) ).
        specialize(r_receive "Alice" "Carol"
                             ([("l3", ltnat, ltend)])
-                            (gcons "Carol" (lcons "Alice" "l3" (ltplus (ltsucc ltzero) (ltsucc ltzero)) lnil)
+                            (gcons "Carol" (lcons "Alice" "l3" (ltadd (ltnval 1) (ltnval 1)) lnil)
                               (gcons "Bob" lnil (gcons "Alice" lnil gnil)))
-                            (gcons "Alice" (lcons "Bob" "l1" ltzero lnil) gnil)
+                            (gcons "Alice" (lcons "Bob" "l1" (ltnval 0) lnil) gnil)
        ); intro HR; simpl in HR.
        setoid_rewrite sassocA.
        apply HR.

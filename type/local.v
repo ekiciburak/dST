@@ -27,11 +27,12 @@ Inductive local  : Type :=
   | ltsig : ( local   ) -> ( local   ) -> local 
   | ltite : ( local   ) -> ( local   ) -> ( local   ) -> local 
   | ltpair : ( local   ) -> ( local   ) -> local 
-  | ltzero : local 
+(*| ltzero : local 
   | ltsucc : ( local   ) -> local
-  | ltplus: local -> local -> local
+  | ltplus: local -> local -> local 
   | ltfalse : local 
   | lttrue : local 
+*)
   | ltnat : local 
   | ltadd : local -> local -> local
   | ltmult : local -> local -> local
@@ -83,11 +84,11 @@ Proof. congruence. Qed.
 Lemma congr_ltgt  { s0 : local   } { s1 : local   } { t0 : local   } { t1 : local   } (H1 : s0 = t0) (H2 : s1 = t1) : ltgt  s0 s1 = ltgt  t0 t1 .
 Proof. congruence. Qed.
 
-Lemma congr_ltzero  : ltzero  = ltzero  .
+(* Lemma congr_ltzero  : ltzero  = ltzero  .
 Proof. congruence. Qed.
 
 Lemma congr_ltsucc  { s0 : local   } { t0 : local   } (H1 : s0 = t0) : ltsucc  s0 = ltsucc  t0 .
-Proof. congruence. Qed.
+Proof. congruence. Qed. *)
 
 Lemma congr_ltnval  { s0 : nat   } { t0 : nat   } (H1 : s0 = t0) : ltnval s0 = ltnval t0 .
 Proof. congruence. Qed.
@@ -104,14 +105,14 @@ Proof. congruence. Qed.
 Lemma congr_ltsubtr  { s0 : local   } { s1 : local   } { t0 : local   } { t1 : local   } (H1 : s0 = t0) (H2 : s1 = t1) : ltsubtr  s0 s1 = ltsubtr  t0 t1 .
 Proof. congruence. Qed.
 
-Lemma congr_ltplus  { s0 : local   } { s1 : local   } { t0 : local   } { t1 : local   } (H1 : s0 = t0) (H2 : s1 = t1) : ltplus  s0 s1 = ltplus  t0 t1 .
-Proof. congruence. Qed.
+(* Lemma congr_ltplus  { s0 : local   } { s1 : local   } { t0 : local   } { t1 : local   } (H1 : s0 = t0) (H2 : s1 = t1) : ltplus  s0 s1 = ltplus  t0 t1 .
+Proof. congruence. Qed. *)
 
-Lemma congr_ltfalse  : ltfalse  = ltfalse  .
+(* Lemma congr_ltfalse  : ltfalse  = ltfalse  .
 Proof. congruence. Qed.
 
 Lemma congr_lttrue  : lttrue  = lttrue  .
-Proof. congruence. Qed.
+Proof. congruence. Qed. *)
 
 Lemma congr_ltnat  : ltnat  = ltnat  .
 Proof. congruence. Qed.
@@ -143,14 +144,14 @@ Fixpoint ren_local   (xilocal : ( fin ) -> fin) (s : local ) : local  :=
     | ltapp  s0 s1 => ltapp  ((ren_local xilocal) s0) ((ren_local xilocal) s1)
     | ltgt  s0 s1 => ltgt ((ren_local xilocal) s0) ((ren_local xilocal) s1)
     | ltpair  s0 s1 => ltpair  ((ren_local xilocal) s0) ((ren_local xilocal) s1)
-    | ltzero   => ltzero 
+(*     | ltzero   => ltzero 
     | ltsucc  s0 => ltsucc  ((ren_local xilocal) s0)
-    | ltplus  s0 s1 => ltplus  ((ren_local xilocal) s0) ((ren_local xilocal) s1)
+    | ltplus  s0 s1 => ltplus  ((ren_local xilocal) s0) ((ren_local xilocal) s1) *)
     | ltadd  s0 s1 => ltadd  ((ren_local xilocal) s0) ((ren_local xilocal) s1)
     | ltmult  s0 s1 => ltmult  ((ren_local xilocal) s0) ((ren_local xilocal) s1)
     | ltsubtr  s0 s1 => ltsubtr  ((ren_local xilocal) s0) ((ren_local xilocal) s1)
-    | ltfalse   => ltfalse 
-    | lttrue   => lttrue 
+(*     | ltfalse   => ltfalse 
+    | lttrue   => lttrue  *)
     | ltnat   => ltnat 
     | ltbool   => ltbool 
     | ltstar   => ltstar 
@@ -179,14 +180,14 @@ Fixpoint subst_local (sigmalocal : ( fin ) -> local ) (s : local ) : local  :=
     | ltapp  s0 s1 => ltapp ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1)
     | ltgt  s0 s1 => ltgt ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1)
     | ltpair  s0 s1 => ltpair  ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1)
-    | ltzero   => ltzero 
+(*     | ltzero   => ltzero 
     | ltsucc  s0 => ltsucc  ((subst_local sigmalocal) s0)
-    | ltplus  s0 s1 => ltplus ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1)
+    | ltplus  s0 s1 => ltplus ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1) *)
     | ltadd  s0 s1 => ltadd ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1)
     | ltmult  s0 s1 => ltmult ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1)
     | ltsubtr  s0 s1 => ltsubtr ((subst_local sigmalocal) s0) ((subst_local sigmalocal) s1)
-    | ltfalse   => ltfalse 
-    | lttrue   => lttrue 
+(*     | ltfalse   => ltfalse 
+    | lttrue   => lttrue  *)
     | ltnat   => ltnat 
     | ltbool   => ltbool 
     | ltstar   => ltstar 
@@ -218,14 +219,14 @@ Fixpoint idSubst_local  (sigmalocal : ( fin ) -> local ) (Eqlocal : forall x, si
     | ltapp  s0 s1 => congr_ltapp ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1)
     | ltgt  s0 s1 => congr_ltgt ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1)
     | ltpair  s0 s1 => congr_ltpair ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
+(*     | ltzero   => congr_ltzero 
     | ltsucc  s0 => congr_ltsucc ((idSubst_local sigmalocal Eqlocal) s0)
-    | ltplus  s0 s1 => congr_ltplus ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1)
+    | ltplus  s0 s1 => congr_ltplus ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1) *)
     | ltadd s0 s1 => congr_ltadd ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1)
     | ltmult s0 s1 => congr_ltmult ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1)
     | ltsubtr s0 s1 => congr_ltsubtr ((idSubst_local sigmalocal Eqlocal) s0) ((idSubst_local sigmalocal Eqlocal) s1)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
@@ -257,14 +258,14 @@ Fixpoint extRen_local   (xilocal : ( fin ) -> fin) (zetalocal : ( fin ) -> fin) 
     | ltapp s0 s1 => congr_ltapp ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1)
     | ltgt s0 s1 => congr_ltgt ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1)
     | ltpair  s0 s1 => congr_ltpair ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
+(*     | ltzero   => congr_ltzero 
     | ltsucc  s0 => congr_ltsucc ((extRen_local xilocal zetalocal Eqlocal) s0)
-    | ltplus s0 s1 => congr_ltplus ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1)
+    | ltplus s0 s1 => congr_ltplus ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1) *)
     | ltadd s0 s1 => congr_ltadd ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1)
     | ltmult s0 s1 => congr_ltmult ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1)
     | ltsubtr s0 s1 => congr_ltsubtr ((extRen_local xilocal zetalocal Eqlocal) s0) ((extRen_local xilocal zetalocal Eqlocal) s1)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
@@ -296,14 +297,14 @@ Fixpoint ext_local   (sigmalocal : ( fin ) -> local ) (taulocal : ( fin ) -> loc
     | ltapp  s0 s1 => congr_ltapp ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1)
     | ltgt  s0 s1 => congr_ltgt ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1)
     | ltpair  s0 s1 => congr_ltpair ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
+(*     | ltzero   => congr_ltzero 
     | ltsucc  s0 => congr_ltsucc ((ext_local sigmalocal taulocal Eqlocal) s0)
-    | ltplus  s0 s1 => congr_ltplus ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1)
+    | ltplus  s0 s1 => congr_ltplus ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1) *)
     | ltadd  s0 s1 => congr_ltadd ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1)
     | ltmult  s0 s1 => congr_ltmult ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1)
     | ltsubtr s0 s1 => congr_ltsubtr ((ext_local sigmalocal taulocal Eqlocal) s0) ((ext_local sigmalocal taulocal Eqlocal) s1)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
@@ -332,14 +333,14 @@ Fixpoint compRenRen_local    (xilocal : ( fin ) -> fin) (zetalocal : ( fin ) -> 
     | ltapp  s0 s1 => congr_ltapp ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1)
     | ltgt  s0 s1 => congr_ltgt ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1)
     | ltpair  s0 s1 => congr_ltpair ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
+(*     | ltzero   => congr_ltzero 
     | ltsucc  s0 => congr_ltsucc ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0)
-    | ltplus  s0 s1 => congr_ltplus ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1)
+    | ltplus  s0 s1 => congr_ltplus ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1) *)
     | ltadd  s0 s1 => congr_ltadd ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1)
     | ltmult  s0 s1 => congr_ltmult ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1)
     | ltsubtr  s0 s1 => congr_ltsubtr ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s0) ((compRenRen_local xilocal zetalocal rholocal Eqlocal) s1)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
@@ -371,14 +372,14 @@ Fixpoint compRenSubst_local    (xilocal : ( fin ) -> fin) (taulocal : ( fin ) ->
     | ltapp  s0 s1 => congr_ltapp ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1)
     | ltgt  s0 s1 => congr_ltgt ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1)
     | ltpair  s0 s1 => congr_ltpair ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
+(*     | ltzero   => congr_ltzero 
     | ltsucc  s0 => congr_ltsucc ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0)
-    | ltplus  s0 s1 => congr_ltplus ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1)
+    | ltplus  s0 s1 => congr_ltplus ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1) *)
     | ltadd  s0 s1 => congr_ltadd ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1)
     | ltmult  s0 s1 => congr_ltmult ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1)
     | ltsubtr  s0 s1 => congr_ltsubtr ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s0) ((compRenSubst_local xilocal taulocal thetalocal Eqlocal) s1)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
@@ -409,15 +410,15 @@ Fixpoint compSubstRen_local    (sigmalocal : ( fin ) -> local ) (zetalocal : ( f
     | ltite  s0 s1 s2 => congr_ltite ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s2)
     | ltapp  s0 s1 => congr_ltapp ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1) 
     | ltgt  s0 s1 => congr_ltgt ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1) 
-    | ltplus  s0 s1 => congr_ltplus ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1) 
+(*     | ltplus  s0 s1 => congr_ltplus ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1)  *)
     | ltadd  s0 s1 => congr_ltadd ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1) 
     | ltmult  s0 s1 => congr_ltmult ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1) 
     | ltsubtr s0 s1 => congr_ltsubtr ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1) 
     | ltpair  s0 s1 => congr_ltpair ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
-    | ltsucc  s0 => congr_ltsucc ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltzero   => congr_ltzero 
+    | ltsucc  s0 => congr_ltsucc ((compSubstRen_local sigmalocal zetalocal thetalocal Eqlocal) s0) *)
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
@@ -449,14 +450,14 @@ Fixpoint compSubstSubst_local    (sigmalocal : ( fin ) -> local ) (taulocal : ( 
     | ltapp  s0 s1 => congr_ltapp ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1)
     | ltgt  s0 s1 => congr_ltgt ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1)
     | ltpair  s0 s1 => congr_ltpair ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
+(*     | ltzero   => congr_ltzero 
     | ltsucc  s0 => congr_ltsucc ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0)
-    | ltplus  s0 s1 => congr_ltplus ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1)
+    | ltplus  s0 s1 => congr_ltplus ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1) *)
     | ltadd  s0 s1 => congr_ltadd ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1)
     | ltmult  s0 s1 => congr_ltmult ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1)
     | ltsubtr  s0 s1 => congr_ltsubtr ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s0) ((compSubstSubst_local sigmalocal taulocal thetalocal Eqlocal) s1)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
@@ -487,15 +488,15 @@ Fixpoint rinst_inst_local   (xilocal : ( fin ) -> fin) (sigmalocal : ( fin ) -> 
     | ltite  s0 s1 s2 => congr_ltite ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1) ((rinst_inst_local xilocal sigmalocal Eqlocal) s2)
     | ltapp  s0 s1 => congr_ltapp ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1)
     | ltgt  s0 s1 => congr_ltgt ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1)
-    | ltplus  s0 s1 => congr_ltplus ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1)
+(*     | ltplus  s0 s1 => congr_ltplus ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1) *)
     | ltadd  s0 s1 => congr_ltadd ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1)
     | ltmult  s0 s1 => congr_ltmult ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1)
     | ltsubtr  s0 s1 => congr_ltsubtr ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1)
     | ltpair  s0 s1 => congr_ltpair ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) ((rinst_inst_local xilocal sigmalocal Eqlocal) s1)
-    | ltzero   => congr_ltzero 
-    | ltsucc  s0 => congr_ltsucc ((rinst_inst_local xilocal sigmalocal Eqlocal) s0)
-    | ltfalse   => congr_ltfalse 
-    | lttrue   => congr_lttrue 
+(*     | ltzero   => congr_ltzero 
+    | ltsucc  s0 => congr_ltsucc ((rinst_inst_local xilocal sigmalocal Eqlocal) s0) *)
+(*     | ltfalse   => congr_ltfalse 
+    | lttrue   => congr_lttrue  *)
     | ltnat   => congr_ltnat 
     | ltbool   => congr_ltbool 
     | ltstar   => congr_ltstar 
