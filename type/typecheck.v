@@ -36,14 +36,14 @@ Inductive typeCheck: list (fin*local) -> fin -> local -> local -> Prop :=
                                       let t := betan n k (mkproc p gnil) in
                                       (* ctx ext *)
                                       typeCheck ((m, (@body t)) :: c) (S m) e t' ->
-                                      typeCheck c m (ltlambda p e) (ltpi (@body t) t')
+                                      typeCheck c m (ltlambda e p) (ltpi (@body t) t')
   | tc_pair  : forall c p k e t' n m, typeCheck c m p ltstar ->
                                       let t := betan n k (mkproc p gnil) in
                                       (* ctx ext *)
                                       typeCheck ((m, (@body t)) :: c) (S m) e t' ->
-                                      typeCheck c m (ltpair p e) (ltsig (@body t) t') 
+                                      typeCheck c m (ltpair e p) (ltsig (@body t) t') 
   | tc_mu    : forall m c p t, typeCheck ((m, t) :: c) (S m) p t ->
-                               typeCheck c m (ltmu t p) t
+                               typeCheck c m (ltmu p t) t
   | tc_nval  : forall c m n, typeCheck c m (ltnval n) ltnat
   | tc_bval  : forall c m b, typeCheck c m (ltbval b) ltbool
   | tc_star  : forall c m, typeCheck c m ltstar ltstar
@@ -74,12 +74,12 @@ Inductive typeCheck: list (fin*local) -> fin -> local -> local -> Prop :=
                                                let t := betan n k (mkproc p gnil) in
                                                (* ctx ext *)
                                                typeCheck ((m, (@body t)) :: c) (S m) p' ltstar ->
-                                               typeCheck c m (ltpi p p') ltstar
+                                               typeCheck c m (ltpi p' p) ltstar
   | tc_sig   : forall c k p p' (t: local) n m, typeCheck c m p ltstar ->
                                                let t := betan n k (mkproc p gnil) in
                                                (* ctx ext *)
                                                typeCheck ((m, (@body t)) :: c) (S m) p' ltstar ->
-                                               typeCheck c m (ltsig p p') ltstar
+                                               typeCheck c m (ltsig p' p) ltstar
   | tc_send  : forall m c p l e P S T, propcont P ->
                                        typeCheck c m e S ->
                                        typeCheck c m P T ->
@@ -91,7 +91,7 @@ Inductive typeCheck: list (fin*local) -> fin -> local -> local -> Prop :=
                       length P = length T ->
                       (* ctx ext *)
                       List.Forall (fun u => typeCheck ((m, (fst u)) :: c) (S m) (fst (snd u)) (snd (snd u))) (zip ST (zip P T)) ->
-                      typeCheck c m (ltreceive p (zip (zip L ST) P)) (ltbranch p (zip (zip L ST) T))
+                      typeCheck c m (ltreceive p (zip (zip L P) ST)) (ltbranch p (zip (zip L T) ST))
   | tc_branch: forall m c k p L (ST T: list local) n,
                       List.Forall (fun u => typecont u) T -> 
                       length L  = length ST ->
@@ -101,7 +101,7 @@ Inductive typeCheck: list (fin*local) -> fin -> local -> local -> Prop :=
                       let ST'' := map (@body) ST' in
                       (* ctx ext *)
                       List.Forall (fun u => typeCheck ((m, (fst u)) :: c) (S m) (snd u) ltstar) (zip ST'' T) ->
-                      typeCheck c m (ltbranch p (zip (zip L ST) T)) ltstar
+                      typeCheck c m (ltbranch p (zip (zip L T) ST)) ltstar
   | tc_select: forall m c k p l ST T n,
                       typecont T ->
                       let ST' := betan n k (mkproc ST gnil) in
